@@ -71,7 +71,7 @@ export default function Start() {
     src="/logo.png"
     alt="TEBI logo"
     style={{
-      width: 160,
+      width: 240,
       height: 'auto',
       margin: '0 auto 16px',
       display: 'block'

@@ -85,7 +85,7 @@ export default function Start() {
     letterSpacing: '-0.03em',
     marginBottom: 6
   }}>
-    Wagenboeking
+    Bedrijfswagen boeken
   </h1>
 
   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>

@@ -121,6 +121,19 @@ export default function Home() {
       )}
       {error && <div className="alert alert-error">{error}</div>}
 
+      <img
+        src="/bedrijfswagen.png"
+        alt="Bedrijfswagen"
+        style={{
+          width: '100%',
+          height: 180,
+          objectFit: 'cover',
+          borderRadius: 12,
+          marginBottom: 20,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+        }}
+      />
+
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="form-group">

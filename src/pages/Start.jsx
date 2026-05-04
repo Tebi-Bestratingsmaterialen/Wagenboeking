@@ -66,32 +66,31 @@ export default function Start() {
       background: 'var(--bg)'
     }}>
       {/* Logo */}
-      <div style={{ marginBottom: 40, textAlign: 'center' }}>
-        <div style={{
-          width: 56,
-          height: 56,
-          background: 'var(--green)',
-          borderRadius: 14,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1.6rem',
-          fontWeight: 800,
-          color: '#fff',
-          margin: '0 auto 16px',
-          boxShadow: '0 4px 16px rgba(61,122,46,0.3)'
-        }}>T</div>
-        <h1 style={{
-          fontSize: '1.5rem',
-          fontWeight: 700,
-          color: 'var(--dark)',
-          letterSpacing: '-0.03em',
-          marginBottom: 6
-        }}>TEBI Wagenboeking</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-          Vul je gegevens in om de bedrijfswagen te boeken.
-        </p>
-      </div>
+<div style={{ marginBottom: 40, textAlign: 'center' }}>
+  <img
+    src="/logo.png"
+    alt="TEBI logo"
+    style={{
+      height: 56,
+      margin: '0 auto 16px',
+      display: 'block'
+    }}
+  />
+
+  <h1 style={{
+    fontSize: '1.5rem',
+    fontWeight: 700,
+    color: 'var(--dark)',
+    letterSpacing: '-0.03em',
+    marginBottom: 6
+  }}>
+    TEBI Wagenboeking
+  </h1>
+
+  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+    Vul je gegevens in om de bedrijfswagen te boeken.
+  </p>
+</div>
 
       {/* Card */}
       <div className="card" style={{ width: '100%', maxWidth: 420 }}>

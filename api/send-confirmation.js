@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   try {
     const { data, error } = await resend.emails.send({
       from: 'onboarding@resend.dev',
-      to: ['sschoonderwoerd@tebi.nl'],
+      to: ['it@tebi.nl'],
       subject: `Bevestiging wagenboeking – ${datumFormatted}`,
       html: `
         <div style="font-family: -apple-system, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px;">

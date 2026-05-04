@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Admin() {
@@ -6,8 +7,24 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('aankomend')
+  const [authLoading, setAuthLoading] = useState(true)
+  const navigate = useNavigate()
 
-  useEffect(() => { fetchAlles() }, [filter])
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  useEffect(() => {
+    if (!authLoading) fetchAlles()
+  }, [filter, authLoading])
+
+  async function checkAuth() {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      navigate('/admin/login')
+    }
+    setAuthLoading(false)
+  }
 
   async function fetchAlles() {
     setLoading(true)
@@ -17,7 +34,7 @@ export default function Admin() {
       .from('bookings')
       .select('*')
       .order('datum', { ascending: true })
-      .order('tijdslot', { ascending: true })
+      .order('van', { ascending: true })
 
     if (filter === 'aankomend') {
       query = query.gte('datum', new Date().toISOString().split('T')[0])
@@ -36,6 +53,11 @@ export default function Admin() {
     else setBoekingen(prev => prev.filter(b => b.id !== id))
   }
 
+  async function uitloggen() {
+    await supabase.auth.signOut()
+    navigate('/admin/login')
+  }
+
   const grouped = boekingen.reduce((acc, b) => {
     if (!acc[b.datum]) acc[b.datum] = []
     acc[b.datum].push(b)
@@ -44,42 +66,35 @@ export default function Admin() {
 
   const today = new Date().toISOString().split('T')[0]
 
+  if (authLoading) return null
+
   return (
     <div className="page-container-wide">
       <div className="page-header">
-        <h1 className="page-title">Admin</h1>
-        <p className="page-subtitle">Overzicht van alle wagenboeking reserveringen.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h1 className="page-title">Admin</h1>
+            <p className="page-subtitle">Overzicht van alle wagenboeking reserveringen.</p>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={uitloggen}>Uitloggen</button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-        <button
-          className={`btn btn-sm ${filter === 'aankomend' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setFilter('aankomend')}
-        >
+        <button className={`btn btn-sm ${filter === 'aankomend' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilter('aankomend')}>
           Aankomend
         </button>
-        <button
-          className={`btn btn-sm ${filter === 'alle' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setFilter('alle')}
-        >
+        <button className={`btn btn-sm ${filter === 'alle' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilter('alle')}>
           Alle boekingen
         </button>
-        <button
-          className="btn btn-sm btn-ghost"
-          onClick={fetchAlles}
-          style={{ marginLeft: 'auto' }}
-        >
+        <button className="btn btn-sm btn-ghost" onClick={fetchAlles} style={{ marginLeft: 'auto' }}>
           ↻ Vernieuwen
         </button>
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      {loading && (
-        <div className="empty-state">
-          <p>Laden...</p>
-        </div>
-      )}
+      {loading && <div className="empty-state"><p>Laden...</p></div>}
 
       {!loading && Object.keys(grouped).length === 0 && (
         <div className="card">
@@ -106,6 +121,7 @@ export default function Admin() {
                 <tr>
                   <th>Tijdslot</th>
                   <th>Naam</th>
+                  <th>E-mail</th>
                   <th>Geboekt op</th>
                   <th style={{ textAlign: 'right' }}>Actie</th>
                 </tr>
@@ -113,15 +129,16 @@ export default function Admin() {
               <tbody>
                 {items.map(b => (
                   <tr key={b.id}>
-                    <td><span className="badge badge-green">{b.tijdslot}</span></td>
-                    <td style={{ fontWeight: 600 }}>{b.naam}</td>
-                    <td style={{ color: 'var(--text-muted)' }}>
-                      {new Date(b.created_at).toLocaleDateString('nl-NL')}
+                    <td>
+                      <span className="badge badge-green">
+                        {b.van ? `${b.van.slice(0,5)} – ${b.tot.slice(0,5)}` : b.tijdslot}
+                      </span>
                     </td>
+                    <td style={{ fontWeight: 600 }}>{b.naam}</td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{b.email || '—'}</td>
+                    <td style={{ color: 'var(--text-muted)' }}>{new Date(b.created_at).toLocaleDateString('nl-NL')}</td>
                     <td style={{ textAlign: 'right' }}>
-                      <button className="btn btn-danger btn-sm" onClick={() => annuleer(b.id)}>
-                        Verwijder
-                      </button>
+                      <button className="btn btn-danger btn-sm" onClick={() => annuleer(b.id)}>Verwijder</button>
                     </td>
                   </tr>
                 ))}

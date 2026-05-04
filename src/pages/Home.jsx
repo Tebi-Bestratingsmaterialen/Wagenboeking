@@ -2,16 +2,6 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
-const TIJDSLOTEN = [
-  '06:00 – 08:00',
-  '08:00 – 10:00',
-  '10:00 – 12:00',
-  '12:00 – 14:00',
-  '14:00 – 16:00',
-  '16:00 – 18:00',
-  'Hele dag',
-]
-
 function getTodayString() {
   return new Date().toISOString().split('T')[0]
 }
@@ -19,7 +9,8 @@ function getTodayString() {
 export default function Home() {
   const [user, setUser] = useState(null)
   const [datum, setDatum] = useState(getTodayString())
-  const [tijdslot, setTijdslot] = useState('')
+  const [van, setVan] = useState('08:00')
+  const [tot, setTot] = useState('12:00')
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -27,11 +18,8 @@ export default function Home() {
 
   useEffect(() => {
     const opgeslagen = localStorage.getItem('tebi_user')
-    if (!opgeslagen) {
-      navigate('/start')
-    } else {
-      setUser(JSON.parse(opgeslagen))
-    }
+    if (!opgeslagen) navigate('/start')
+    else setUser(JSON.parse(opgeslagen))
   }, [])
 
   async function handleSubmit(e) {
@@ -39,19 +27,23 @@ export default function Home() {
     setError('')
     setSuccess(false)
 
-    if (!datum || !tijdslot) {
+    if (!datum || !van || !tot) {
       setError('Vul alle velden in.')
+      return
+    }
+
+    if (van >= tot) {
+      setError('Eindtijd moet na de begintijd liggen.')
       return
     }
 
     setLoading(true)
 
-    // Check of tijdslot al bezet is
+    // Check overlappende boekingen op die datum
     const { data: bestaand, error: checkError } = await supabase
       .from('bookings')
-      .select('id')
+      .select('van, tot, naam')
       .eq('datum', datum)
-      .eq('tijdslot', tijdslot)
 
     if (checkError) {
       setError('Er is een fout opgetreden. Probeer opnieuw.')
@@ -59,21 +51,18 @@ export default function Home() {
       return
     }
 
-    if (bestaand && bestaand.length > 0) {
-      setError(`Dit tijdslot is al geboekt op ${formatDatum(datum)}. Kies een ander tijdslot.`)
+    const overlap = bestaand?.find(b => van < b.tot && tot > b.van)
+    if (overlap) {
+      setError(`Er is al een boeking van ${overlap.van.slice(0,5)} tot ${overlap.tot.slice(0,5)} door ${overlap.naam}. Kies een ander tijdslot.`)
       setLoading(false)
       return
     }
 
-    // Boeking opslaan
+    const tijdslot = `${van} – ${tot}`
+
     const { error: insertError } = await supabase
       .from('bookings')
-      .insert([{
-        naam: user.naam,
-        email: user.email,
-        datum,
-        tijdslot
-      }])
+      .insert([{ naam: user.naam, email: user.email, datum, tijdslot, van, tot }])
 
     if (insertError) {
       setError('Opslaan mislukt: ' + insertError.message)
@@ -81,18 +70,11 @@ export default function Home() {
       return
     }
 
-    // Bevestigingsmail via Vercel API route
     try {
-      console.log('Mail versturen naar:', user.email)
       const mailRes = await fetch('/api/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          naam: user.naam,
-          email: user.email,
-          datum,
-          tijdslot
-        })
+        body: JSON.stringify({ naam: user.naam, email: user.email, datum, tijdslot })
       })
       const mailData = await mailRes.json()
       console.log('Mail response:', mailData)
@@ -102,7 +84,8 @@ export default function Home() {
 
     setSuccess(true)
     setDatum(getTodayString())
-    setTijdslot('')
+    setVan('08:00')
+    setTot('12:00')
     setLoading(false)
   }
 
@@ -136,9 +119,7 @@ export default function Home() {
           ✓ Boeking geplaatst! Je ontvangt een bevestiging op <strong>{user.email}</strong>.
         </div>
       )}
-      {error && (
-        <div className="alert alert-error">{error}</div>
-      )}
+      {error && <div className="alert alert-error">{error}</div>}
 
       <div className="card">
         <form onSubmit={handleSubmit}>
@@ -154,33 +135,37 @@ export default function Home() {
             />
           </div>
 
-          <div className="form-group" style={{ marginBottom: 24 }}>
-            <label htmlFor="tijdslot">Tijdslot</label>
-            <select
-              id="tijdslot"
-              value={tijdslot}
-              onChange={e => setTijdslot(e.target.value)}
-              required
-            >
-              <option value="">Selecteer een tijdslot...</option>
-              {TIJDSLOTEN.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label htmlFor="van">Van</label>
+              <input
+                id="van"
+                type="time"
+                value={van}
+                onChange={e => setVan(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label htmlFor="tot">Tot</label>
+              <input
+                id="tot"
+                type="time"
+                value={tot}
+                onChange={e => setTot(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary btn-full"
-            disabled={loading}
-          >
+          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
             {loading ? 'Bezig met opslaan...' : 'Boeking plaatsen →'}
           </button>
         </form>
 
         <div className="divider" />
         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-          Per tijdslot kan slechts één persoon de wagen boeken. Dubbele boekingen worden automatisch geblokkeerd.
+          Overlappende boekingen worden automatisch geblokkeerd.
         </p>
       </div>
     </div>

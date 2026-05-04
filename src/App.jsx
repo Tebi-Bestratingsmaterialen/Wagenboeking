@@ -4,15 +4,17 @@ import Start from './pages/Start'
 import Home from './pages/Home'
 import MijnBoekingen from './pages/MijnBoekingen'
 import Admin from './pages/Admin'
+import AdminLogin from './pages/AdminLogin'
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Startpagina heeft eigen layout (geen navbar) */}
+        {/* Pagina's zonder navbar */}
         <Route path="/start" element={<Start />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* Rest heeft navbar + footer */}
+        {/* Pagina's met navbar */}
         <Route path="/*" element={
           <>
             <Navbar />

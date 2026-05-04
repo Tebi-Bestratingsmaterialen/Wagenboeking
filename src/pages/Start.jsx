@@ -71,7 +71,8 @@ export default function Start() {
     src="/logo.png"
     alt="TEBI logo"
     style={{
-      height: 56,
+      width: 160,
+      height: 'auto',
       margin: '0 auto 16px',
       display: 'block'
     }}
@@ -84,7 +85,7 @@ export default function Start() {
     letterSpacing: '-0.03em',
     marginBottom: 6
   }}>
-    TEBI Wagenboeking
+    Wagenboeking
   </h1>
 
   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>

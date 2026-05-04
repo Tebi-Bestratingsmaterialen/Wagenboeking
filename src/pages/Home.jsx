@@ -65,6 +65,7 @@ export default function Home() {
       return
     }
 
+    // Boeking opslaan
     const { error: insertError } = await supabase
       .from('bookings')
       .insert([{
@@ -80,18 +81,22 @@ export default function Home() {
       return
     }
 
-    // Stuur bevestigingsmail via Edge Function
+    // Bevestigingsmail via Vercel API route
     try {
-      await supabase.functions.invoke('send-booking-confirmation', {
-        body: {
+      console.log('Mail versturen naar:', user.email)
+      const mailRes = await fetch('/api/send-confirmation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           naam: user.naam,
           email: user.email,
           datum,
           tijdslot
-        }
+        })
       })
+      const mailData = await mailRes.json()
+      console.log('Mail response:', mailData)
     } catch (mailErr) {
-      // Mail fout is niet kritiek — boeking is al opgeslagen
       console.warn('Mail kon niet worden verstuurd:', mailErr)
     }
 
@@ -121,9 +126,7 @@ export default function Home() {
               <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{user.naam}</div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{user.email}</div>
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={uitloggen}>
-              Wijzig
-            </button>
+            <button className="btn btn-ghost btn-sm" onClick={uitloggen}>Wijzig</button>
           </div>
         </div>
       </div>
@@ -188,22 +191,4 @@ function formatDatum(dateStr) {
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('nl-NL', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   })
-}
-
-try {
-  console.log('Mail versturen naar:', user.email)
-  const mailRes = await fetch('/api/send-confirmation', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      naam: user.naam,
-      email: user.email,
-      datum,
-      tijdslot
-    })
-  })
-  const mailData = await mailRes.json()
-  console.log('Mail response:', mailData)
-} catch (mailErr) {
-  console.warn('Mail kon niet worden verstuurd:', mailErr)
 }

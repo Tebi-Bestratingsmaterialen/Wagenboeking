@@ -21,8 +21,8 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'wagenboeking@tebi.nl',
-        to: [email],
+        from: 'onboarding@resend.dev',
+        to: ['it@tebi.nl'],
         subject: `Bevestiging wagenboeking – ${datumFormatted}`,
         html: `
           <div style="font-family: -apple-system, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px;">

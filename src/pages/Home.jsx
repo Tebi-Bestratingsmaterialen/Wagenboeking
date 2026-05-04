@@ -189,3 +189,21 @@ function formatDatum(dateStr) {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   })
 }
+
+try {
+  console.log('Mail versturen naar:', user.email)
+  const mailRes = await fetch('/api/send-confirmation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      naam: user.naam,
+      email: user.email,
+      datum,
+      tijdslot
+    })
+  })
+  const mailData = await mailRes.json()
+  console.log('Mail response:', mailData)
+} catch (mailErr) {
+  console.warn('Mail kon niet worden verstuurd:', mailErr)
+}

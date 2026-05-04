@@ -67,7 +67,16 @@ export default function Start() {
     }}>
       {/* Logo */}
 <div style={{ marginBottom: 40, textAlign: 'center' }}>
-  
+  <img
+    src="/logo.png"
+    alt="TEBI logo"
+    style={{
+      width: 240,
+      height: 'auto',
+      margin: '0 auto 16px',
+      display: 'block'
+    }}
+  />
 
   <h1 style={{
     fontSize: '1.5rem',

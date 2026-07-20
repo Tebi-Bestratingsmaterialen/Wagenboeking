@@ -89,15 +89,18 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
                 alignItems: 'center',
                 justifyContent: 'flex-start',
                 gap: 3,
-                minHeight: 52,
-                padding: '6px 2px',
+                minHeight: 56,
+                padding: '8px 2px',
                 borderRadius: 8,
                 border: isSelected ? '1.5px solid var(--green)' : '1.5px solid transparent',
                 background: isSelected ? 'var(--green-muted)' : (isToday ? '#fffbe6' : 'transparent'),
                 cursor: 'pointer',
                 opacity: isPast ? 0.45 : 1,
                 fontFamily: 'inherit',
+                transition: 'background 0.12s, border-color 0.12s',
               }}
+              onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--bg)' }}
+              onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = isToday ? '#fffbe6' : 'transparent' }}
             >
               <span style={{ fontSize: '0.82rem', fontWeight: isToday ? 800 : 500 }}>{day}</span>
               {dayBookings.length > 0 && (
@@ -120,7 +123,18 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
         })}
       </div>
 
-      <div className="divider" style={{ margin: '16px 0 12px' }} />
+      <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
+          Boeking
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 8, height: 8, borderRadius: 3, background: '#fffbe6', border: '1px solid #f5c500', display: 'inline-block' }} />
+          Vandaag
+        </span>
+      </div>
+
+      <div className="divider" style={{ margin: '14px 0 12px' }} />
 
       <div>
         <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>

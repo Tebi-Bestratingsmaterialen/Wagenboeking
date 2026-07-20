@@ -115,7 +115,7 @@ export default function Home() {
             <h1 className="page-title">Bedrijfswagen boeken</h1>
             <p className="page-subtitle">Reserveer de bedrijfswagen voor een datum en tijdslot.</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div className="user-chip">
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{user.naam}</div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{user.email}</div>

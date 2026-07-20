@@ -104,11 +104,34 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
+}
+
+.booking-layout > div:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.booking-layout > div:first-child .card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px 8px 14px;
+  box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 780px) {
   .booking-layout { grid-template-columns: 1fr; }
+  .booking-layout > div:first-child .card { flex: none; }
 }
 
 @media (max-width: 600px) {

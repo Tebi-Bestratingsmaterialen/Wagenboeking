@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import MonthCalendar from '../components/MonthCalendar'
 
 function getTodayString() {
   return new Date().toISOString().split('T')[0]
@@ -14,12 +15,22 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [allBookings, setAllBookings] = useState([])
   const navigate = useNavigate()
+
+  const fetchBookings = useCallback(async () => {
+    const { data } = await supabase
+      .from('bookings')
+      .select('naam, datum, van, tot')
+      .order('datum', { ascending: true })
+    if (data) setAllBookings(data)
+  }, [])
 
   useEffect(() => {
     const opgeslagen = localStorage.getItem('tebi_user')
     if (!opgeslagen) navigate('/start')
     else setUser(JSON.parse(opgeslagen))
+    fetchBookings()
   }, [])
 
   async function handleSubmit(e) {
@@ -83,10 +94,10 @@ export default function Home() {
     }
 
     setSuccess(true)
-    setDatum(getTodayString())
     setVan('08:00')
     setTot('12:00')
     setLoading(false)
+    fetchBookings()
   }
 
   function uitloggen() {
@@ -97,7 +108,7 @@ export default function Home() {
   if (!user) return null
 
   return (
-    <div className="page-container">
+    <div className="page-container-wide">
       <div className="page-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
           <div>
@@ -121,65 +132,75 @@ export default function Home() {
       )}
       {error && <div className="alert alert-error">{error}</div>}
 
-      <img
-        src="/bedrijfswagen.png"
-        alt="Bedrijfswagen"
-        style={{
-          width: '100%',
-          height: 180,
-          objectFit: 'cover',
-          borderRadius: 12,
-          marginBottom: 20,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-        }}
-      />
+      <div className="booking-layout">
+        <div>
+          <img
+            src="/bedrijfswagen.png"
+            alt="Bedrijfswagen"
+            style={{
+              width: '100%',
+              height: 180,
+              objectFit: 'cover',
+              borderRadius: 12,
+              marginBottom: 20,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+            }}
+          />
 
-      <div className="card">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="datum">Datum</label>
-            <input
-              id="datum"
-              type="date"
-              value={datum}
-              min={getTodayString()}
-              onChange={e => setDatum(e.target.value)}
-              required
-            />
+          <div className="card">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="datum">Datum</label>
+                <input
+                  id="datum"
+                  type="date"
+                  value={datum}
+                  min={getTodayString()}
+                  onChange={e => setDatum(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="van">Van</label>
+                  <input
+                    id="van"
+                    type="time"
+                    value={van}
+                    onChange={e => setVan(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label htmlFor="tot">Tot</label>
+                  <input
+                    id="tot"
+                    type="time"
+                    value={tot}
+                    onChange={e => setTot(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+                {loading ? 'Bezig met opslaan...' : 'Boeking plaatsen →'}
+              </button>
+            </form>
+
+            <div className="divider" />
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              Overlappende boekingen worden automatisch geblokkeerd.
+            </p>
           </div>
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label htmlFor="van">Van</label>
-              <input
-                id="van"
-                type="time"
-                value={van}
-                onChange={e => setVan(e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label htmlFor="tot">Tot</label>
-              <input
-                id="tot"
-                type="time"
-                value={tot}
-                onChange={e => setTot(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? 'Bezig met opslaan...' : 'Boeking plaatsen →'}
-          </button>
-        </form>
-
-        <div className="divider" />
-        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-          Overlappende boekingen worden automatisch geblokkeerd.
-        </p>
+        <MonthCalendar
+          bookings={allBookings}
+          selectedDate={datum}
+          onSelectDate={setDatum}
+        />
       </div>
     </div>
   )

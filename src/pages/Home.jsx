@@ -130,7 +130,7 @@ export default function Home() {
 
       {success && (
         <div className="alert alert-success">
-          ✓ Boeking voor <strong>{getVehicle(wagen).naam}</strong> geplaatst! Je ontvangt een bevestiging op <strong>{user.email}</strong>.
+          ✓ Boeking voor <strong>{getVehicle(wagen).naam}</strong> geplaatst!
         </div>
       )}
       {error && <div className="alert alert-error">{error}</div>}

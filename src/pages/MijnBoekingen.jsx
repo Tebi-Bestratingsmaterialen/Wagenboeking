@@ -28,8 +28,11 @@ export default function MijnBoekingen() {
   const [weekStart, setWeekStart] = useState(new Date())
   const [wagenFilter, setWagenFilter] = useState('alle')
   const [error, setError] = useState('')
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
+    const opgeslagen = localStorage.getItem('tebi_user')
+    if (opgeslagen) setUser(JSON.parse(opgeslagen))
     fetchBoekingen()
   }, [])
 
@@ -214,7 +217,7 @@ export default function MijnBoekingen() {
                   </div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{b.naam}</div>
                 </div>
-                {geselecteerdeDag >= today && (
+                {geselecteerdeDag >= today && user && b.email === user.email && (
                   <button className="btn btn-ghost btn-sm" onClick={() => annuleer(b.id)}>
                     Annuleren
                   </button>

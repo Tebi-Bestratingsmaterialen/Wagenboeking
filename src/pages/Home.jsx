@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { VEHICLES, getVehicle } from '../lib/vehicles'
 import MonthCalendar from '../components/MonthCalendar'
 
 function getTodayString() {
@@ -9,6 +10,7 @@ function getTodayString() {
 
 export default function Home() {
   const [user, setUser] = useState(null)
+  const [wagen, setWagen] = useState(VEHICLES[0].id)
   const [datum, setDatum] = useState(getTodayString())
   const [van, setVan] = useState('08:00')
   const [tot, setTot] = useState('12:00')
@@ -21,7 +23,7 @@ export default function Home() {
   const fetchBookings = useCallback(async () => {
     const { data } = await supabase
       .from('bookings')
-      .select('naam, datum, van, tot')
+      .select('naam, datum, van, tot, wagen')
       .order('datum', { ascending: true })
     if (data) setAllBookings(data)
   }, [])
@@ -50,11 +52,12 @@ export default function Home() {
 
     setLoading(true)
 
-    // Check overlappende boekingen op die datum
+    // Check overlappende boekingen op die datum, voor dezelfde wagen
     const { data: bestaand, error: checkError } = await supabase
       .from('bookings')
       .select('van, tot, naam')
       .eq('datum', datum)
+      .eq('wagen', wagen)
 
     if (checkError) {
       setError('Er is een fout opgetreden. Probeer opnieuw.')
@@ -64,7 +67,7 @@ export default function Home() {
 
     const overlap = bestaand?.find(b => van < b.tot && tot > b.van)
     if (overlap) {
-      setError(`Er is al een boeking van ${overlap.van.slice(0,5)} tot ${overlap.tot.slice(0,5)} door ${overlap.naam}. Kies een ander tijdslot.`)
+      setError(`${getVehicle(wagen).naam} is al geboekt van ${overlap.van.slice(0,5)} tot ${overlap.tot.slice(0,5)} door ${overlap.naam}. Kies een ander tijdslot of een andere auto.`)
       setLoading(false)
       return
     }
@@ -73,7 +76,7 @@ export default function Home() {
 
     const { error: insertError } = await supabase
       .from('bookings')
-      .insert([{ naam: user.naam, email: user.email, datum, tijdslot, van, tot }])
+      .insert([{ naam: user.naam, email: user.email, datum, tijdslot, van, tot, wagen }])
 
     if (insertError) {
       setError('Opslaan mislukt: ' + insertError.message)
@@ -85,7 +88,7 @@ export default function Home() {
       const mailRes = await fetch('/api/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ naam: user.naam, email: user.email, datum, tijdslot })
+        body: JSON.stringify({ naam: user.naam, email: user.email, datum, tijdslot, wagen: getVehicle(wagen).naam })
       })
       const mailData = await mailRes.json()
       console.log('Mail response:', mailData)
@@ -127,7 +130,7 @@ export default function Home() {
 
       {success && (
         <div className="alert alert-success">
-          ✓ Boeking geplaatst! Je ontvangt een bevestiging op <strong>{user.email}</strong>.
+          ✓ Boeking voor <strong>{getVehicle(wagen).naam}</strong> geplaatst! Je ontvangt een bevestiging op <strong>{user.email}</strong>.
         </div>
       )}
       {error && <div className="alert alert-error">{error}</div>}
@@ -149,6 +152,40 @@ export default function Home() {
 
           <div className="card">
             <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Auto</label>
+                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${VEHICLES.length}, 1fr)`, gap: 8 }}>
+                  {VEHICLES.map(v => {
+                    const actief = wagen === v.id
+                    return (
+                      <button
+                        type="button"
+                        key={v.id}
+                        onClick={() => setWagen(v.id)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 6,
+                          padding: '10px 6px',
+                          borderRadius: 10,
+                          border: actief ? `1.5px solid ${v.kleur}` : '1.5px solid var(--border)',
+                          background: actief ? `${v.kleur}14` : 'var(--surface)',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit',
+                          transition: 'border-color 0.12s, background 0.12s',
+                        }}
+                      >
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: v.kleur, display: 'block' }} />
+                        <span style={{ fontSize: '0.78rem', fontWeight: actief ? 700 : 500, color: actief ? v.kleur : 'var(--text)', textAlign: 'center', lineHeight: 1.2 }}>
+                          {v.naam}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
               <div className="form-group">
                 <label htmlFor="datum">Datum</label>
                 <input

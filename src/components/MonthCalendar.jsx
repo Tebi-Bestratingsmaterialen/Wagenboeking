@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { getVehicle, VEHICLES } from '../lib/vehicles'
 
 const MAANDEN = [
   'januari', 'februari', 'maart', 'april', 'mei', 'juni',
@@ -82,7 +83,7 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
               type="button"
               key={idx}
               onClick={() => onSelectDate && onSelectDate(dateStr)}
-              title={dayBookings.map(b => `${b.naam}: ${b.van?.slice(0,5)}–${b.tot?.slice(0,5)}`).join('\n')}
+              title={dayBookings.map(b => `${getVehicle(b.wagen).naam} – ${b.naam}: ${b.van?.slice(0,5)}–${b.tot?.slice(0,5)}`).join('\n')}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -109,11 +110,12 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
                   gap: 2,
                   flexWrap: 'wrap',
                   justifyContent: 'center',
+                  maxWidth: 28,
                 }}>
-                  {dayBookings.slice(0, 3).map((b, i) => (
+                  {dayBookings.slice(0, 4).map((b, i) => (
                     <span key={i} style={{
                       width: 6, height: 6, borderRadius: '50%',
-                      background: 'var(--green)',
+                      background: getVehicle(b.wagen).kleur,
                     }} />
                   ))}
                 </span>
@@ -123,11 +125,13 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
         })}
       </div>
 
-      <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }} />
-          Boeking
-        </span>
+      <div style={{ display: 'flex', gap: 12, marginTop: 12, fontSize: '0.72rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+        {VEHICLES.map(v => (
+          <span key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
+            {v.naam}
+          </span>
+        ))}
         <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
           <span style={{ width: 8, height: 8, borderRadius: 3, background: '#fffbe6', border: '1px solid #f5c500', display: 'inline-block' }} />
           Vandaag
@@ -146,16 +150,23 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
         {(bookingsByDate[selectedDate] || [])
           .slice()
           .sort((a, b) => a.van.localeCompare(b.van))
-          .map((b, i) => (
-            <div key={i} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '8px 10px', borderRadius: 8, background: 'var(--bg)', marginBottom: 6,
-              fontSize: '0.85rem',
-            }}>
-              <span style={{ fontWeight: 600 }}>{b.naam}</span>
-              <span style={{ color: 'var(--text-muted)' }}>{b.van?.slice(0,5)}–{b.tot?.slice(0,5)}</span>
-            </div>
-          ))}
+          .map((b, i) => {
+            const v = getVehicle(b.wagen)
+            return (
+              <div key={i} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '8px 10px', borderRadius: 8, background: 'var(--bg)', marginBottom: 6,
+                fontSize: '0.85rem', gap: 8,
+              }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, flexShrink: 0 }} />
+                  <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.naam}</span>
+                  <span style={{ fontSize: '0.72rem', color: v.kleur, fontWeight: 600, flexShrink: 0 }}>{v.naam}</span>
+                </span>
+                <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>{b.van?.slice(0,5)}–{b.tot?.slice(0,5)}</span>
+              </div>
+            )
+          })}
       </div>
     </div>
   )

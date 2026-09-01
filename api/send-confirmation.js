@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { naam, email, datum, tijdslot } = req.body
+  const { naam, email, datum, tijdslot, wagen } = req.body
 
   const datumFormatted = new Date(datum + 'T00:00:00').toLocaleDateString('nl-NL', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   try {
     const { data, error } = await resend.emails.send({
       from: 'onboarding@resend.dev',
-      to: ['it@tebi.nl'],
+      to: [email],
       subject: `Bevestiging wagenboeking – ${datumFormatted}`,
       html: `
         <div style="font-family: -apple-system, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 24px;">
@@ -28,6 +28,10 @@ export default async function handler(req, res) {
               <tr>
                 <td style="padding: 8px 0; color: #8a8a8a; font-size: 0.85rem; width: 40%;">Datum</td>
                 <td style="padding: 8px 0; font-weight: 600; color: #1a1a1a;">${datumFormatted}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; color: #8a8a8a; font-size: 0.85rem;">Auto</td>
+                <td style="padding: 8px 0; font-weight: 600; color: #1a1a1a;">${wagen || '-'}</td>
               </tr>
               <tr>
                 <td style="padding: 8px 0; color: #8a8a8a; font-size: 0.85rem;">Tijdslot</td>

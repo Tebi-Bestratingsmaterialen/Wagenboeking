@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { VEHICLES, getVehicle } from '../lib/vehicles'
 
 function getWeekDays(startDate) {
   const days = []
@@ -25,6 +26,7 @@ export default function MijnBoekingen() {
   const [loading, setLoading] = useState(true)
   const [geselecteerdeDag, setGeselecteerdeDag] = useState(toDateString(new Date()))
   const [weekStart, setWeekStart] = useState(new Date())
+  const [wagenFilter, setWagenFilter] = useState('alle')
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -55,7 +57,8 @@ export default function MijnBoekingen() {
   const weekDagen = getWeekDays(weekStart)
   const today = toDateString(new Date())
 
-  const boekingenOpDag = boekingen.filter(b => b.datum === geselecteerdeDag)
+  const boekingenGefilterd = wagenFilter === 'alle' ? boekingen : boekingen.filter(b => b.wagen === wagenFilter)
+  const boekingenOpDag = boekingenGefilterd.filter(b => b.datum === geselecteerdeDag)
 
   function vorigeWeek() {
     const d = new Date(weekStart)
@@ -83,6 +86,41 @@ export default function MijnBoekingen() {
 
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* Wagen filter */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        <button
+          className="btn btn-sm"
+          onClick={() => setWagenFilter('alle')}
+          style={{
+            border: wagenFilter === 'alle' ? '1.5px solid var(--text)' : '1.5px solid var(--border)',
+            background: wagenFilter === 'alle' ? 'var(--text)' : 'var(--surface)',
+            color: wagenFilter === 'alle' ? '#fff' : 'var(--text)',
+          }}
+        >
+          Alle auto's
+        </button>
+        {VEHICLES.map(v => {
+          const actief = wagenFilter === v.id
+          return (
+            <button
+              key={v.id}
+              className="btn btn-sm"
+              onClick={() => setWagenFilter(v.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                border: actief ? `1.5px solid ${v.kleur}` : '1.5px solid var(--border)',
+                background: actief ? `${v.kleur}14` : 'var(--surface)',
+                color: actief ? v.kleur : 'var(--text)',
+                fontWeight: actief ? 700 : 500,
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
+              {v.naam}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Kalender */}
       <div className="card" style={{ marginBottom: 20, padding: '20px' }}>
         {/* Navigatie */}
@@ -96,7 +134,7 @@ export default function MijnBoekingen() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
           {weekDagen.map((dag, i) => {
             const dagStr = toDateString(dag)
-            const heeftBoeking = boekingen.some(b => b.datum === dagStr)
+            const boekingenDezeDag = boekingenGefilterd.filter(b => b.datum === dagStr)
             const isGeselecteerd = dagStr === geselecteerdeDag
             const isVandaag = dagStr === today
             const isVerleden = dagStr < today
@@ -126,11 +164,15 @@ export default function MijnBoekingen() {
                 <span style={{ fontSize: '1rem', fontWeight: 700, lineHeight: 1 }}>
                   {dag.getDate()}
                 </span>
-                {heeftBoeking && (
-                  <div style={{
-                    width: 6, height: 6, borderRadius: '50%',
-                    background: isGeselecteerd ? 'rgba(255,255,255,0.8)' : 'var(--green)'
-                  }} />
+                {boekingenDezeDag.length > 0 && (
+                  <span style={{ display: 'flex', gap: 2 }}>
+                    {boekingenDezeDag.slice(0, 3).map((b, idx) => (
+                      <span key={idx} style={{
+                        width: 6, height: 6, borderRadius: '50%',
+                        background: isGeselecteerd ? 'rgba(255,255,255,0.9)' : getVehicle(b.wagen).kleur
+                      }} />
+                    ))}
+                  </span>
                 )}
               </button>
             )
@@ -153,23 +195,34 @@ export default function MijnBoekingen() {
           </div>
         )}
 
-        {boekingenOpDag.map(b => (
-          <div key={b.id} className="card" style={{ marginBottom: 10, padding: '16px 20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: 2 }}>
-                  {b.van ? `${b.van.slice(0,5)} – ${b.tot.slice(0,5)}` : b.tijdslot}
+        {boekingenOpDag.map(b => {
+          const v = getVehicle(b.wagen)
+          return (
+            <div key={b.id} className="card" style={{ marginBottom: 10, padding: '16px 20px', borderLeft: `3px solid ${v.kleur}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontWeight: 700, fontSize: '1rem' }}>
+                      {b.van ? `${b.van.slice(0,5)} – ${b.tot.slice(0,5)}` : b.tijdslot}
+                    </span>
+                    <span style={{
+                      fontSize: '0.7rem', fontWeight: 700, color: v.kleur, background: `${v.kleur}14`,
+                      padding: '2px 8px', borderRadius: 99,
+                    }}>
+                      {v.naam}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{b.naam}</div>
                 </div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{b.naam}</div>
+                {geselecteerdeDag >= today && (
+                  <button className="btn btn-ghost btn-sm" onClick={() => annuleer(b.id)}>
+                    Annuleren
+                  </button>
+                )}
               </div>
-              {geselecteerdeDag >= today && (
-                <button className="btn btn-ghost btn-sm" onClick={() => annuleer(b.id)}>
-                  Annuleren
-                </button>
-              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

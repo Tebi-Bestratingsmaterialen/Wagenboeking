@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { VEHICLES, getVehicle } from '../lib/vehicles'
 
 export default function Admin() {
   const [boekingen, setBoekingen] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('aankomend')
+  const [wagenFilter, setWagenFilter] = useState('alle')
   const [authLoading, setAuthLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -58,7 +60,9 @@ export default function Admin() {
     navigate('/admin/login')
   }
 
-  const grouped = boekingen.reduce((acc, b) => {
+  const boekingenGefilterd = wagenFilter === 'alle' ? boekingen : boekingen.filter(b => b.wagen === wagenFilter)
+
+  const grouped = boekingenGefilterd.reduce((acc, b) => {
     if (!acc[b.datum]) acc[b.datum] = []
     acc[b.datum].push(b)
     return acc
@@ -80,7 +84,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
         <button className={`btn btn-sm ${filter === 'aankomend' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setFilter('aankomend')}>
           Aankomend
         </button>
@@ -90,6 +94,40 @@ export default function Admin() {
         <button className="btn btn-sm btn-ghost" onClick={fetchAlles} style={{ marginLeft: 'auto' }}>
           ↻ Vernieuwen
         </button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
+        <button
+          className="btn btn-sm"
+          onClick={() => setWagenFilter('alle')}
+          style={{
+            border: wagenFilter === 'alle' ? '1.5px solid var(--text)' : '1.5px solid var(--border)',
+            background: wagenFilter === 'alle' ? 'var(--text)' : 'var(--surface)',
+            color: wagenFilter === 'alle' ? '#fff' : 'var(--text)',
+          }}
+        >
+          Alle auto's
+        </button>
+        {VEHICLES.map(v => {
+          const actief = wagenFilter === v.id
+          return (
+            <button
+              key={v.id}
+              className="btn btn-sm"
+              onClick={() => setWagenFilter(v.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                border: actief ? `1.5px solid ${v.kleur}` : '1.5px solid var(--border)',
+                background: actief ? `${v.kleur}14` : 'var(--surface)',
+                color: actief ? v.kleur : 'var(--text)',
+                fontWeight: actief ? 700 : 500,
+              }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
+              {v.naam}
+            </button>
+          )
+        })}
       </div>
 
       {error && <div className="alert alert-error">{error}</div>}
@@ -119,6 +157,7 @@ export default function Admin() {
             <table className="data-table">
               <thead>
                 <tr>
+                  <th>Auto</th>
                   <th>Tijdslot</th>
                   <th>Naam</th>
                   <th>E-mail</th>
@@ -127,21 +166,33 @@ export default function Admin() {
                 </tr>
               </thead>
               <tbody>
-                {items.map(b => (
-                  <tr key={b.id}>
-                    <td>
-                      <span className="badge badge-green">
-                        {b.van ? `${b.van.slice(0,5)} – ${b.tot.slice(0,5)}` : b.tijdslot}
-                      </span>
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{b.naam}</td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{b.email || '—'}</td>
-                    <td style={{ color: 'var(--text-muted)' }}>{new Date(b.created_at).toLocaleDateString('nl-NL')}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button className="btn btn-danger btn-sm" onClick={() => annuleer(b.id)}>Verwijder</button>
-                    </td>
-                  </tr>
-                ))}
+                {items.map(b => {
+                  const v = getVehicle(b.wagen)
+                  return (
+                    <tr key={b.id}>
+                      <td>
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6,
+                          fontSize: '0.8rem', fontWeight: 700, color: v.kleur,
+                        }}>
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
+                          {v.naam}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="badge" style={{ background: `${v.kleur}14`, color: v.kleur, border: `1px solid ${v.kleur}33` }}>
+                          {b.van ? `${b.van.slice(0,5)} – ${b.tot.slice(0,5)}` : b.tijdslot}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{b.naam}</td>
+                      <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{b.email || '—'}</td>
+                      <td style={{ color: 'var(--text-muted)' }}>{new Date(b.created_at).toLocaleDateString('nl-NL')}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button className="btn btn-danger btn-sm" onClick={() => annuleer(b.id)}>Verwijder</button>
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>

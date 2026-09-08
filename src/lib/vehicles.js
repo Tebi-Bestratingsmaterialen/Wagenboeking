@@ -4,8 +4,8 @@
 // Laat foto op null staan zolang je nog geen foto hebt — dan toont de kaart een kleurvlak i.p.v. een gebroken afbeelding.
 export const VEHICLES = [
   { id: 'berlingo_geel_oud', merk: 'Citroën', model: 'Berlingo', variant: 'Geel oud', kenteken: 'TF-098-N', kleur: '#e0a100', foto: null },
-  { id: 'berlingo_zilver', merk: 'Citroën', model: 'Berlingo', variant: 'Zilver', kenteken: 'VKZ-24-K', kleur: '#64748b', foto: null },
-  { id: 'berlingo_henk', merk: 'Citroën', model: 'Berlingo', variant: 'Henk', kenteken: 'VLR-28-N', kleur: '#a855f7', foto: null },
+  { id: 'berlingo_zilver', merk: 'Citroën', model: 'Berlingo', variant: 'Zilver', kenteken: 'VKZ-24-K', kleur: '#64748b', foto: '/vehicles/Citroen_berlingo_zilver.jpg' },
+  { id: 'berlingo_henk', merk: 'Citroën', model: 'Berlingo', variant: 'Henk', kenteken: 'VLR-28-N', kleur: '#a855f7', foto: '/vehicle/Citroen_berlingo_henk.jpg' },
   { id: 'mercedes_eqv', merk: 'Mercedes', model: 'EQV', variant: 'Elektrische bus', kenteken: 'S-464-GP', kleur: '#1f6feb', foto: '/vehicles/Mercedes_EQV_300.jpg' },
 ]
 

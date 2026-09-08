@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Wagenboeking <it@tebi.nl>',
+      from: 'Wagenboeking Tebi <it@tebi.nl>',
       to: [email],
       subject: `Bevestiging wagenboeking – ${datumFormatted}`,
       html: `

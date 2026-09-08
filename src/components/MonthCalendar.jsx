@@ -129,7 +129,7 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
         {VEHICLES.map(v => (
           <span key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
-            {getVehicleName(v)}
+            {v.variant}
           </span>
         ))}
         <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>

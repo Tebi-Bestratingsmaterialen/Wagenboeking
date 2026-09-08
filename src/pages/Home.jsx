@@ -135,73 +135,57 @@ export default function Home() {
       )}
       {error && <div className="alert alert-error">{error}</div>}
 
+      {/* Vehicle picker: grote kaarten met ruimte voor een foto */}
+      <div className="form-group" style={{ marginBottom: 24 }}>
+        <label>Kies een auto</label>
+        <div className="vehicle-grid">
+          {VEHICLES.map(v => {
+            const actief = wagen === v.id
+            return (
+              <button
+                type="button"
+                key={v.id}
+                onClick={() => setWagen(v.id)}
+                className="vehicle-card"
+                style={{
+                  border: actief ? `2px solid ${v.kleur}` : '2px solid var(--border)',
+                  boxShadow: actief ? `0 4px 16px ${v.kleur}26` : 'var(--shadow-sm)',
+                }}
+              >
+                <div className="vehicle-card-photo" style={{ background: v.foto ? `center / cover no-repeat url(${v.foto})` : `linear-gradient(135deg, ${v.kleur}22, ${v.kleur}0a)` }}>
+                  {!v.foto && (
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.55 }}>
+                      <path d="M3 12l1.5-4.5A2 2 0 0 1 6.4 6h11.2a2 2 0 0 1 1.9 1.5L21 12" stroke={v.kleur} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      <rect x="2" y="12" width="20" height="6" rx="1.5" stroke={v.kleur} strokeWidth="1.6"/>
+                      <circle cx="7" cy="18.5" r="1.6" fill={v.kleur}/>
+                      <circle cx="17" cy="18.5" r="1.6" fill={v.kleur}/>
+                    </svg>
+                  )}
+                  {actief && (
+                    <span className="vehicle-card-check" style={{ background: v.kleur }}>✓</span>
+                  )}
+                </div>
+                <div className="vehicle-card-info">
+                  <div style={{ fontWeight: 700, fontSize: '0.92rem', color: actief ? v.kleur : 'var(--text)' }}>
+                    {v.merk} {v.model}
+                  </div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                    {v.variant}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-light)', fontFamily: 'monospace', marginTop: 4 }}>
+                    {v.kenteken}
+                  </div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       <div className="booking-layout">
         <div>
-          <img
-            src="/bedrijfswagen.png"
-            alt="Bedrijfswagen"
-            style={{
-              width: '100%',
-              height: 180,
-              objectFit: 'cover',
-              borderRadius: 12,
-              marginBottom: 20,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-            }}
-          />
-
           <div className="card">
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Auto</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  {VEHICLES.map(v => {
-                    const actief = wagen === v.id
-                    return (
-                      <button
-                        type="button"
-                        key={v.id}
-                        onClick={() => setWagen(v.id)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          padding: '12px 14px',
-                          borderRadius: 12,
-                          border: actief ? `1.5px solid ${v.kleur}` : '1.5px solid var(--border)',
-                          background: actief ? `${v.kleur}0f` : 'var(--surface)',
-                          cursor: 'pointer',
-                          fontFamily: 'inherit',
-                          textAlign: 'left',
-                          transition: 'border-color 0.12s, background 0.12s',
-                        }}
-                      >
-                        <span style={{
-                          width: 34, height: 34, borderRadius: 9, background: `${v.kleur}1a`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                        }}>
-                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: v.kleur, display: 'block' }} />
-                        </span>
-                        <span style={{ minWidth: 0 }}>
-                          <span style={{
-                            display: 'block', fontSize: '0.85rem', fontWeight: actief ? 700 : 600,
-                            color: actief ? v.kleur : 'var(--text)', lineHeight: 1.25,
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                          }}>
-                            {v.merk} {v.model}
-                          </span>
-                          <span style={{
-                            display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3,
-                          }}>
-                            {v.variant} · {v.kenteken}
-                          </span>
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
               <div className="form-group">
                 <label htmlFor="datum">Datum</label>
                 <input

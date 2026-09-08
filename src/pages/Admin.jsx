@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { VEHICLES, getVehicle } from '../lib/vehicles'
+import { VEHICLES, getVehicle, getVehicleName } from '../lib/vehicles'
 
 export default function Admin() {
   const [boekingen, setBoekingen] = useState([])
@@ -124,7 +124,7 @@ export default function Admin() {
               }}
             >
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
-              {v.naam}
+              {v.variant}
             </button>
           )
         })}
@@ -171,13 +171,17 @@ export default function Admin() {
                   return (
                     <tr key={b.id}>
                       <td>
-                        <span style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 6,
-                          fontSize: '0.8rem', fontWeight: 700, color: v.kleur,
-                        }}>
-                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
-                          {v.naam}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block', flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>
+                              {getVehicleName(v)} <span style={{ color: v.kleur }}>· {v.variant}</span>
+                            </div>
+                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                              {v.kenteken}
+                            </div>
+                          </div>
+                        </div>
                       </td>
                       <td>
                         <span className="badge" style={{ background: `${v.kleur}14`, color: v.kleur, border: `1px solid ${v.kleur}33` }}>

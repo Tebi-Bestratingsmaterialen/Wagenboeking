@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { VEHICLES, getVehicle } from '../lib/vehicles'
+import { VEHICLES, getVehicle, getVehicleName } from '../lib/vehicles'
 
 function getWeekDays(startDate) {
   const days = []
@@ -118,7 +118,7 @@ export default function MijnBoekingen() {
               }}
             >
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
-              {v.naam}
+              {v.variant}
             </button>
           )
         })}
@@ -212,7 +212,7 @@ export default function MijnBoekingen() {
                       fontSize: '0.7rem', fontWeight: 700, color: v.kleur, background: `${v.kleur}14`,
                       padding: '2px 8px', borderRadius: 99,
                     }}>
-                      {v.naam}
+                      {v.variant} <span style={{ opacity: 0.7, fontWeight: 500 }}>· {v.kenteken}</span>
                     </span>
                   </div>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{b.naam}</div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { VEHICLES, getVehicle } from '../lib/vehicles'
+import { VEHICLES, getVehicle, getVehicleName } from '../lib/vehicles'
 import MonthCalendar from '../components/MonthCalendar'
 
 function getTodayString() {
@@ -67,7 +67,7 @@ export default function Home() {
 
     const overlap = bestaand?.find(b => van < b.tot && tot > b.van)
     if (overlap) {
-      setError(`${getVehicle(wagen).naam} is al geboekt van ${overlap.van.slice(0,5)} tot ${overlap.tot.slice(0,5)} door ${overlap.naam}. Kies een ander tijdslot of een andere auto.`)
+      setError(`${getVehicleName(getVehicle(wagen))} (${getVehicle(wagen).variant}) is al geboekt van ${overlap.van.slice(0,5)} tot ${overlap.tot.slice(0,5)} door ${overlap.naam}. Kies een ander tijdslot of een andere auto.`)
       setLoading(false)
       return
     }
@@ -88,7 +88,7 @@ export default function Home() {
       const mailRes = await fetch('/api/send-confirmation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ naam: user.naam, email: user.email, datum, tijdslot, wagen: getVehicle(wagen).naam })
+        body: JSON.stringify({ naam: user.naam, email: user.email, datum, tijdslot, wagen: `${getVehicleName(getVehicle(wagen))} – ${getVehicle(wagen).variant} (${getVehicle(wagen).kenteken})` })
       })
       const mailData = await mailRes.json()
       console.log('Mail response:', mailData)
@@ -130,7 +130,7 @@ export default function Home() {
 
       {success && (
         <div className="alert alert-success">
-          ✓ Boeking voor <strong>{getVehicle(wagen).naam}</strong> geplaatst! Je ontvangt een bevestiging op <strong>{user.email}</strong>.
+          ✓ Boeking voor <strong>{getVehicleName(getVehicle(wagen))}</strong> ({getVehicle(wagen).variant}) geplaatst! Je ontvangt een bevestiging op <strong>{user.email}</strong>.
         </div>
       )}
       {error && <div className="alert alert-error">{error}</div>}
@@ -154,7 +154,7 @@ export default function Home() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Auto</label>
-                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${VEHICLES.length}, 1fr)`, gap: 8 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   {VEHICLES.map(v => {
                     const actief = wagen === v.id
                     return (
@@ -164,21 +164,37 @@ export default function Home() {
                         onClick={() => setWagen(v.id)}
                         style={{
                           display: 'flex',
-                          flexDirection: 'column',
                           alignItems: 'center',
-                          gap: 6,
-                          padding: '10px 6px',
-                          borderRadius: 10,
+                          gap: 10,
+                          padding: '12px 14px',
+                          borderRadius: 12,
                           border: actief ? `1.5px solid ${v.kleur}` : '1.5px solid var(--border)',
-                          background: actief ? `${v.kleur}14` : 'var(--surface)',
+                          background: actief ? `${v.kleur}0f` : 'var(--surface)',
                           cursor: 'pointer',
                           fontFamily: 'inherit',
+                          textAlign: 'left',
                           transition: 'border-color 0.12s, background 0.12s',
                         }}
                       >
-                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: v.kleur, display: 'block' }} />
-                        <span style={{ fontSize: '0.78rem', fontWeight: actief ? 700 : 500, color: actief ? v.kleur : 'var(--text)', textAlign: 'center', lineHeight: 1.2 }}>
-                          {v.naam}
+                        <span style={{
+                          width: 34, height: 34, borderRadius: 9, background: `${v.kleur}1a`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}>
+                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: v.kleur, display: 'block' }} />
+                        </span>
+                        <span style={{ minWidth: 0 }}>
+                          <span style={{
+                            display: 'block', fontSize: '0.85rem', fontWeight: actief ? 700 : 600,
+                            color: actief ? v.kleur : 'var(--text)', lineHeight: 1.25,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {v.merk} {v.model}
+                          </span>
+                          <span style={{
+                            display: 'block', fontSize: '0.72rem', color: 'var(--text-muted)', lineHeight: 1.3,
+                          }}>
+                            {v.variant} · {v.kenteken}
+                          </span>
                         </span>
                       </button>
                     )

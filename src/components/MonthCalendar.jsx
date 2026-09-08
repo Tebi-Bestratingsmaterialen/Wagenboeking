@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { getVehicle, VEHICLES } from '../lib/vehicles'
+import { getVehicle, VEHICLES, getVehicleName } from '../lib/vehicles'
 
 const MAANDEN = [
   'januari', 'februari', 'maart', 'april', 'mei', 'juni',
@@ -83,7 +83,7 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
               type="button"
               key={idx}
               onClick={() => onSelectDate && onSelectDate(dateStr)}
-              title={dayBookings.map(b => `${getVehicle(b.wagen).naam} – ${b.naam}: ${b.van?.slice(0,5)}–${b.tot?.slice(0,5)}`).join('\n')}
+              title={dayBookings.map(b => `${getVehicleName(getVehicle(b.wagen))} (${getVehicle(b.wagen).variant}) – ${b.naam}: ${b.van?.slice(0,5)}–${b.tot?.slice(0,5)}`).join('\n')}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -129,7 +129,7 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
         {VEHICLES.map(v => (
           <span key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, display: 'inline-block' }} />
-            {v.naam}
+            {getVehicleName(v)}
           </span>
         ))}
         <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -161,7 +161,7 @@ export default function MonthCalendar({ bookings, selectedDate, onSelectDate }) 
                 <span style={{ display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: v.kleur, flexShrink: 0 }} />
                   <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.naam}</span>
-                  <span style={{ fontSize: '0.72rem', color: v.kleur, fontWeight: 600, flexShrink: 0 }}>{v.naam}</span>
+                  <span style={{ fontSize: '0.72rem', color: v.kleur, fontWeight: 600, flexShrink: 0 }}>{getVehicleName(v)} · {v.variant}</span>
                 </span>
                 <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>{b.van?.slice(0,5)}–{b.tot?.slice(0,5)}</span>
               </div>

@@ -6,7 +6,7 @@ export const VEHICLES = [
   { id: 'berlingo_geel_oud', merk: 'Citroën', model: 'Berlingo', variant: 'Geel oud', kenteken: 'TF-098-N', kleur: '#e0a100', foto: null },
   { id: 'berlingo_zilver', merk: 'Citroën', model: 'Berlingo', variant: 'Zilver', kenteken: 'VKZ-24-K', kleur: '#64748b', foto: null },
   { id: 'berlingo_henk', merk: 'Citroën', model: 'Berlingo', variant: 'Henk', kenteken: 'VLR-28-N', kleur: '#a855f7', foto: null },
-  { id: 'mercedes_eqv', merk: 'Mercedes', model: 'EQV', variant: 'Elektrische bus', kenteken: 'S-464-GP', kleur: '#1f6feb', foto: '/vehicles/Mercedes_EQV_300.jpeg' },
+  { id: 'mercedes_eqv', merk: 'Mercedes', model: 'EQV', variant: 'Elektrische bus', kenteken: 'S-464-GP', kleur: '#1f6feb', foto: '/vehicles/Mercedes_EQV_300.jpg' },
 ]
 
 export function getVehicle(id) {
